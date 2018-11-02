@@ -1,5 +1,7 @@
 # Adafruit IO Arduino Library [![Build Status](https://travis-ci.org/adafruit/Adafruit_IO_Arduino.svg?branch=master)](https://travis-ci.org/adafruit/Adafruit_IO_Arduino)
 
+This fork addresses a REST problem in the forked library. The fix is quick and dirty for now (since I cannot figure out how to parse data out properly), however it seems to work. 
+
 Arduino library to access the Adafruit IO REST API on platforms like the FONA,
 CC3000, and ESP8266.  This is a good library for simple send and receive access
 to Adafruit IO feeds.  Unlike MQTT the REST API does not require a connection to
