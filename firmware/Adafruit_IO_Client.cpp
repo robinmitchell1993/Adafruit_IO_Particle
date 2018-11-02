@@ -64,6 +64,7 @@ bool Adafruit_IO_Client::send(const char* feed, const char* value,
     // Now wait to read response (up to the client's configured stream timeout).
     // First read the HTTP/1.1 response.
     char recvbuffer[IO_RECV_LENGTH] = {0};
+
     if ((_client.readBytesUntil(' ', recvbuffer, sizeof(recvbuffer)) != 8) ||
         (strcmp_P(recvbuffer, PSTR("HTTP/1.1")) != 0)) {
         DEBUG_PRINTLN(F("Failed to find expected HTTP/1.1 response!"));
@@ -89,6 +90,8 @@ bool Adafruit_IO_Client::send(const char* feed, const char* value,
 FeedData Adafruit_IO_Client::receive(const char* feed, const char* key) {
     // Make HTTP GET request to read latest feed item and then parse response
     // into FeedData object.
+    char recvbuffer[1024] = {0};
+    char data = 0;
 
     // First make sure a connection to the service is available.
     if (!connected()) {
@@ -105,7 +108,6 @@ FeedData Adafruit_IO_Client::receive(const char* feed, const char* key) {
 
     // Parse HTTP GET response.
     // First read the HTTP/1.1 response.
-    char recvbuffer[IO_RECV_LENGTH] = {0};
     if ((_client.readBytesUntil(' ', recvbuffer, sizeof(recvbuffer)) != 8) ||
         (strcmp_P(recvbuffer, PSTR("HTTP/1.1")) != 0)) {
         DEBUG_PRINTLN(F("Failed to find expected HTTP/1.1 response!"));
@@ -130,7 +132,9 @@ FeedData Adafruit_IO_Client::receive(const char* feed, const char* key) {
     // Now parse all the header lines and look for an explicit content length.
     // If no content length is found then assume a chunked transfer encoding.
     uint16_t len = 0;
+    /*
     while (true) {
+        /*
         char c = _client.peek();
         // Check for \r\n blank line to signify end of headers.
         if (c == '\r') {
@@ -160,7 +164,10 @@ FeedData Adafruit_IO_Client::receive(const char* feed, const char* key) {
             _client.stop();
             return FeedData();
         }
+
     }
+
+
     // If we didn't see a content-length header then assume a chunked transfer
     // encoding and read the length as the first line.
     if (len == 0) {
@@ -170,10 +177,26 @@ FeedData Adafruit_IO_Client::receive(const char* feed, const char* key) {
             _client.stop();
             return FeedData();
         }
+
+    }
+    */
+
+    while(true)
+    {
+      memset(recvbuffer, 0, sizeof(recvbuffer));
+      int noBytes = _client.readBytesUntil('\n', recvbuffer, 1024);
+
+      if(noBytes < 3)
+      {
+        memset(recvbuffer, 0, sizeof(recvbuffer));
+        _client.readBytes(recvbuffer, 1024);
+        break;
+      }
     }
 
     // Let FeedData parse out the result.
-    return FeedData(_client, len);
+    return FeedData(recvbuffer);
+
 }
 
 bool Adafruit_IO_Client::connected() {
